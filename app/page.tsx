@@ -132,7 +132,7 @@ function RealisticSnow() {
   useEffect(() => {
     const snowChars = ['❄', '❅', '❆', '✻', '✼', '•'];
     const flakes = Array.from({ length: 100 }, (_, i) => {
-      const depth = i < 30 ? 'far' : i < 70 ? 'mid' : 'near';
+      const depth: 'far' | 'mid' | 'near' = i < 30 ? 'far' : i < 70 ? 'mid' : 'near';
       return {
         id: i,
         left: Math.random() * 100,
