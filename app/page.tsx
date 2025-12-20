@@ -27,7 +27,7 @@ function useSoundEffects() {
       gain.connect(ctx.destination);
       osc.frequency.value = 600 + Math.random() * 400;
       osc.type = "sine";
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
       osc.start();
       osc.stop(ctx.currentTime + 0.05);
@@ -36,19 +36,19 @@ function useSoundEffects() {
     }
   }, [getCtx]);
 
-  const playGrab = useCallback(() => {
+  const playHover = useCallback(() => {
     try {
       const ctx = getCtx();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
       gain.connect(ctx.destination);
-      osc.frequency.value = 300;
-      osc.type = "triangle";
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
+      osc.frequency.value = 400;
+      osc.type = "sine";
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
       osc.start();
-      osc.stop(ctx.currentTime + 0.2);
+      osc.stop(ctx.currentTime + 0.1);
     } catch (e) {
       console.log(e);
     }
@@ -61,13 +61,33 @@ function useSoundEffects() {
       const gain = ctx.createGain();
       osc.connect(gain);
       gain.connect(ctx.destination);
-      osc.frequency.setValueAtTime(500, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.15);
+      osc.frequency.setValueAtTime(600, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.2);
       osc.type = "sine";
       gain.gain.setValueAtTime(0.1, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
       osc.start();
-      osc.stop(ctx.currentTime + 0.15);
+      osc.stop(ctx.currentTime + 0.2);
+    } catch (e) {
+      console.log(e);
+    }
+  }, [getCtx]);
+
+  const playGrab = useCallback(() => {
+    try {
+      const ctx = getCtx();
+      [800, 1000, 1200].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.value = freq;
+        osc.type = "sine";
+        gain.gain.setValueAtTime(0.12, ctx.currentTime + i * 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 0.15);
+        osc.start(ctx.currentTime + i * 0.08);
+        osc.stop(ctx.currentTime + i * 0.08 + 0.15);
+      });
     } catch (e) {
       console.log(e);
     }
@@ -83,37 +103,17 @@ function useSoundEffects() {
         gain.connect(ctx.destination);
         osc.frequency.value = freq;
         osc.type = "sine";
-        gain.gain.setValueAtTime(0.15, ctx.currentTime + i * 0.1);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.3);
-        osc.start(ctx.currentTime + i * 0.1);
-        osc.stop(ctx.currentTime + i * 0.1 + 0.3);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime + i * 0.12);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.3);
+        osc.start(ctx.currentTime + i * 0.12);
+        osc.stop(ctx.currentTime + i * 0.12 + 0.3);
       });
     } catch (e) {
       console.log(e);
     }
   }, [getCtx]);
 
-  const playDrumroll = useCallback(() => {
-    try {
-      const ctx = getCtx();
-      for (let i = 0; i < 20; i++) {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.value = 150 + Math.random() * 50;
-        osc.type = "triangle";
-        gain.gain.setValueAtTime(0.05, ctx.currentTime + i * 0.03);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.03 + 0.03);
-        osc.start(ctx.currentTime + i * 0.03);
-        osc.stop(ctx.currentTime + i * 0.03 + 0.03);
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }, [getCtx]);
-
-  return { playTick, playGrab, playFeint, playWin, playDrumroll };
+  return { playTick, playHover, playFeint, playGrab, playWin };
 }
 
 // ================== 雪アニメーション ==================
@@ -218,7 +218,10 @@ function PairModal({
             <div className="flex items-center justify-center gap-4 flex-wrap">
               {pair.members.map((member, i) => (
                 <div key={i} className="flex items-center gap-3">
-                  <div className="text-2xl font-bold text-gray-800 bg-white px-4 py-2 rounded-xl shadow-md animate-memberReveal" style={{ animationDelay: `${i * 0.2}s` }}>
+                  <div 
+                    className="text-2xl font-bold text-gray-800 bg-white px-4 py-2 rounded-xl shadow-md animate-memberReveal" 
+                    style={{ animationDelay: `${i * 0.3}s` }}
+                  >
                     {member}
                   </div>
                   {i < pair.members.length - 1 && (
@@ -255,22 +258,20 @@ function PairModal({
 // ================== ルーレットホイール ==================
 function RouletteWheel({
   names,
-  isSpinning,
   rotation,
-  targetIndex,
-  grabbingIndex,
-  isGrabbing,
-  isFeinting,
+  handPosition,
+  handEmoji,
+  targetName,
   grabbedMembers,
+  isGrabbing,
 }: {
   names: string[];
-  isSpinning: boolean;
   rotation: number;
-  targetIndex: number;
-  grabbingIndex: number;
-  isGrabbing: boolean;
-  isFeinting: boolean;
+  handPosition: { x: number; y: number } | null;
+  handEmoji: string;
+  targetName: string | null;
   grabbedMembers: string[];
+  isGrabbing: boolean;
 }) {
   const count = names.length;
   if (count === 0) return null;
@@ -278,93 +279,107 @@ function RouletteWheel({
   const segmentAngle = 360 / count;
 
   return (
-    <div className="relative flex items-center justify-center">
+    <div className="relative flex items-center justify-center" style={{ width: 320, height: 320 }}>
       {/* 外側の装飾リング */}
       <div className="absolute w-80 h-80 rounded-full border-8 border-yellow-400 shadow-2xl" />
       
       {/* ルーレット本体 */}
       <div
-        className="w-72 h-72 rounded-full relative overflow-hidden shadow-xl"
-        style={{
-          transform: `rotate(${rotation}deg)`,
-          transition: isSpinning ? "none" : "transform 0.3s ease-out",
-        }}
+        className="w-72 h-72 rounded-full relative overflow-hidden shadow-xl transition-transform duration-100"
+        style={{ transform: `rotate(${rotation}deg)` }}
       >
-        {/* セグメント背景 */}
-        {names.map((_, i) => {
-          const startAngle = segmentAngle * i;
-          const color = i % 2 === 0 ? "#c41e3a" : "#228B22";
-          return (
-            <div
-              key={`seg-${i}`}
-              className="absolute top-0 left-0 w-full h-full"
-              style={{
-                background: `conic-gradient(from ${startAngle}deg, ${color} 0deg, ${color} ${segmentAngle}deg, transparent ${segmentAngle}deg)`,
-              }}
-            />
-          );
-        })}
+        {/* セグメント背景 - 動的に生成 */}
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+          {names.map((_, i) => {
+            const startAngle = (segmentAngle * i - 90) * (Math.PI / 180);
+            const endAngle = (segmentAngle * (i + 1) - 90) * (Math.PI / 180);
+            const x1 = 50 + 50 * Math.cos(startAngle);
+            const y1 = 50 + 50 * Math.sin(startAngle);
+            const x2 = 50 + 50 * Math.cos(endAngle);
+            const y2 = 50 + 50 * Math.sin(endAngle);
+            const largeArc = segmentAngle > 180 ? 1 : 0;
+            const color = i % 2 === 0 ? "#c41e3a" : "#228B22";
+            
+            return (
+              <path
+                key={`seg-${i}`}
+                d={`M 50 50 L ${x1} ${y1} A 50 50 0 ${largeArc} 1 ${x2} ${y2} Z`}
+                fill={color}
+              />
+            );
+          })}
+          {/* 区切り線 */}
+          {names.map((_, i) => {
+            const angle = (segmentAngle * i - 90) * (Math.PI / 180);
+            const x = 50 + 50 * Math.cos(angle);
+            const y = 50 + 50 * Math.sin(angle);
+            return (
+              <line
+                key={`line-${i}`}
+                x1="50"
+                y1="50"
+                x2={x}
+                y2={y}
+                stroke="#ffd700"
+                strokeWidth="0.5"
+              />
+            );
+          })}
+        </svg>
 
         {/* 名前表示 */}
         {names.map((name, i) => {
           const angle = segmentAngle * i + segmentAngle / 2;
           const isGrabbed = grabbedMembers.includes(name);
-          const isBeingGrabbed = grabbingIndex === i && isGrabbing;
-          const isBeingFeinted = grabbingIndex === i && isFeinting;
+          const isTarget = targetName === name;
+          
+          // 名前の位置を計算（中心から外側へ）
+          const radians = (angle - 90) * (Math.PI / 180);
+          const radius = 38; // 中心からの距離（%）
+          const x = 50 + radius * Math.cos(radians);
+          const y = 50 + radius * Math.sin(radians);
           
           return (
             <div
               key={`name-${i}`}
-              className={`absolute top-0 left-1/2 h-1/2 origin-bottom flex items-start justify-center pt-3 transition-all duration-300
-                ${isGrabbed ? "opacity-30 scale-75" : ""}
-                ${isBeingGrabbed ? "animate-grabbed scale-125 z-10" : ""}
-                ${isBeingFeinted ? "animate-feint" : ""}`}
+              className={`absolute text-white font-bold text-xs text-center transition-all duration-300
+                ${isGrabbed ? "opacity-20" : ""}
+                ${isTarget && isGrabbing ? "scale-125 text-yellow-300 z-10" : ""}`}
               style={{
-                transform: `translateX(-50%) rotate(${angle}deg)`,
-                width: "60px",
+                left: `${x}%`,
+                top: `${y}%`,
+                transform: `translate(-50%, -50%) rotate(${-rotation}deg)`,
+                textShadow: "1px 1px 2px black, -1px -1px 2px black",
+                maxWidth: "60px",
+                wordBreak: "break-all",
               }}
             >
-              <span
-                className={`text-white font-bold text-xs drop-shadow-lg text-center truncate px-1
-                  ${isBeingGrabbed ? "text-yellow-300 text-sm" : ""}`}
-                style={{ 
-                  textShadow: "1px 1px 2px black",
-                  transform: `rotate(${-angle - rotation}deg)`,
-                }}
-              >
-                {name}
-              </span>
+              {name}
             </div>
           );
         })}
 
-        {/* セグメント区切り線 */}
-        {names.map((_, i) => (
-          <div
-            key={`line-${i}`}
-            className="absolute top-0 left-1/2 w-0.5 h-1/2 bg-yellow-400/80 origin-bottom"
-            style={{ transform: `translateX(-50%) rotate(${segmentAngle * i}deg)` }}
-          />
-        ))}
-
         {/* 中央の円 */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg flex items-center justify-center">
-          <span className="text-3xl">🎄</span>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg flex items-center justify-center border-4 border-yellow-300">
+          <span className="text-2xl">🎄</span>
         </div>
       </div>
 
-      {/* つまみ出す手 */}
-      <div
-        className={`absolute z-30 text-6xl transition-all duration-300 ${
-          isGrabbing || isFeinting ? "opacity-100 scale-110" : "opacity-0 scale-75"
-        }`}
-        style={{
-          top: "-20px",
-          transform: `translateX(${isGrabbing ? "0" : isFeinting ? "5px" : "0"})`,
-        }}
-      >
-        🖐️
-      </div>
+      {/* 手のアイコン */}
+      {handPosition && (
+        <div
+          className="absolute z-30 text-5xl transition-all pointer-events-none"
+          style={{
+            left: `${handPosition.x}%`,
+            top: `${handPosition.y}%`,
+            transform: "translate(-50%, -50%)",
+            transitionDuration: "400ms",
+            transitionTimingFunction: "ease-out",
+          }}
+        >
+          {handEmoji}
+        </div>
+      )}
 
       {/* ポインター */}
       <div className="absolute -top-4 z-20 flex flex-col items-center">
@@ -382,12 +397,12 @@ export default function ChristmasRoulette() {
   const [groupSize, setGroupSize] = useState(2);
   
   const [isRunning, setIsRunning] = useState(false);
-  const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
-  const [targetIndex, setTargetIndex] = useState(-1);
-  const [grabbingIndex, setGrabbingIndex] = useState(-1);
+  
+  const [handPosition, setHandPosition] = useState<{ x: number; y: number } | null>(null);
+  const [handEmoji, setHandEmoji] = useState("🖐️");
+  const [targetName, setTargetName] = useState<string | null>(null);
   const [isGrabbing, setIsGrabbing] = useState(false);
-  const [isFeinting, setIsFeinting] = useState(false);
   
   const [results, setResults] = useState<PairResult[]>([]);
   const [currentPair, setCurrentPair] = useState<string[]>([]);
@@ -398,7 +413,7 @@ export default function ChristmasRoulette() {
   const [modalPair, setModalPair] = useState<PairResult | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   
-  const { playTick, playGrab, playFeint, playWin, playDrumroll } = useSoundEffects();
+  const { playTick, playHover, playFeint, playGrab, playWin } = useSoundEffects();
 
   // 参加者追加
   const addParticipant = () => {
@@ -424,78 +439,140 @@ export default function ChristmasRoulette() {
     return a;
   };
 
+  // 名前の位置を計算
+  const getNamePosition = useCallback((name: string, names: string[], currentRotation: number) => {
+    const index = names.indexOf(name);
+    if (index === -1) return { x: 50, y: 50 };
+    
+    const segmentAngle = 360 / names.length;
+    const angle = segmentAngle * index + segmentAngle / 2 + currentRotation;
+    const radians = (angle - 90) * (Math.PI / 180);
+    const radius = 35; // パーセント
+    
+    return {
+      x: 50 + radius * Math.cos(radians),
+      y: 50 + radius * Math.sin(radians),
+    };
+  }, []);
+
+  // 手を中央（待機位置）に移動
+  const moveHandToCenter = useCallback(() => {
+    setHandPosition({ x: 50, y: -10 });
+    setHandEmoji("🖐️");
+  }, []);
+
+  // 手を名前の位置に移動
+  const moveHandToName = useCallback((name: string, names: string[], currentRotation: number) => {
+    const pos = getNamePosition(name, names, currentRotation);
+    // 少し上に調整
+    setHandPosition({ x: pos.x, y: pos.y - 15 });
+  }, [getNamePosition]);
+
   // 一人をつまみ出す演出
   const grabOnePerson = useCallback(
-    async (remaining: string[], currentPairMembers: string[]): Promise<{ name: string; remaining: string[] }> => {
+    async (remaining: string[], currentRotation: number): Promise<{ name: string; remaining: string[] }> => {
       return new Promise((resolve) => {
-        const availableIndices = remaining.map((_, i) => i);
+        // 手を待機位置に
+        moveHandToCenter();
+        setHandEmoji("🖐️");
         
-        // フェイント回数（1-3回）
-        const feintCount = 1 + Math.floor(Math.random() * 3);
-        let feintsDone = 0;
-        
-        const doFeint = () => {
-          if (feintsDone < feintCount) {
-            // フェイント対象をランダムに選ぶ
-            const feintIdx = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-            setGrabbingIndex(feintIdx);
-            setIsFeinting(true);
-            playFeint();
-            
-            setTimeout(() => {
-              setIsFeinting(false);
-              feintsDone++;
-              setTimeout(doFeint, 300 + Math.random() * 400);
-            }, 400);
-          } else {
-            // 本番のつまみ出し
-            playDrumroll();
-            setTimeout(() => {
-              const targetIdx = availableIndices[Math.floor(Math.random() * availableIndices.length)];
-              setGrabbingIndex(targetIdx);
-              setIsGrabbing(true);
-              playGrab();
+        setTimeout(() => {
+          // フェイント回数（1-2回）
+          const feintCount = 1 + Math.floor(Math.random() * 2);
+          const feintTargets: string[] = [];
+          
+          // フェイント対象を選ぶ（最終ターゲットとは別）
+          const shuffled = shuffle(remaining);
+          const finalTarget = shuffled[0];
+          for (let i = 1; i < Math.min(feintCount + 1, shuffled.length); i++) {
+            feintTargets.push(shuffled[i] || shuffled[0]);
+          }
+          
+          let feintsDone = 0;
+          
+          const doFeint = () => {
+            if (feintsDone < feintTargets.length) {
+              const feintTarget = feintTargets[feintsDone];
+              
+              // 手を対象に移動
+              playHover();
+              setTargetName(feintTarget);
+              moveHandToName(feintTarget, remaining, currentRotation);
               
               setTimeout(() => {
-                const grabbed = remaining[targetIdx];
-                playWin();
+                // つまみそうな動き
+                setHandEmoji("🤏");
                 
                 setTimeout(() => {
-                  setIsGrabbing(false);
-                  setGrabbingIndex(-1);
-                  const newRemaining = remaining.filter((_, i) => i !== targetIdx);
-                  resolve({ name: grabbed, remaining: newRemaining });
-                }, 500);
-              }, 600);
-            }, 600);
-          }
-        };
-        
-        doFeint();
+                  // やっぱりやめる
+                  playFeint();
+                  setHandEmoji("🖐️");
+                  setTargetName(null);
+                  moveHandToCenter();
+                  
+                  feintsDone++;
+                  setTimeout(doFeint, 600);
+                }, 400);
+              }, 500);
+            } else {
+              // 本番のつまみ出し
+              setTimeout(() => {
+                playHover();
+                setTargetName(finalTarget);
+                moveHandToName(finalTarget, remaining, currentRotation);
+                
+                setTimeout(() => {
+                  // つまむ！
+                  setHandEmoji("🤏");
+                  setIsGrabbing(true);
+                  playGrab();
+                  
+                  setTimeout(() => {
+                    // 持ち上げる
+                    setHandPosition({ x: 50, y: -20 });
+                    playWin();
+                    
+                    setTimeout(() => {
+                      // 完了
+                      setIsGrabbing(false);
+                      setTargetName(null);
+                      setHandPosition(null);
+                      setHandEmoji("🖐️");
+                      
+                      const newRemaining = remaining.filter((n) => n !== finalTarget);
+                      resolve({ name: finalTarget, remaining: newRemaining });
+                    }, 600);
+                  }, 500);
+                }, 400);
+              }, 400);
+            }
+          };
+          
+          doFeint();
+        }, 300);
       });
     },
-    [playFeint, playDrumroll, playGrab, playWin]
+    [moveHandToCenter, moveHandToName, playHover, playFeint, playGrab, playWin]
   );
 
   // ペアを1組決める
   const decideOnePair = useCallback(
-    async (remaining: string[]): Promise<{ pair: PairResult; remaining: string[] }> => {
+    async (remaining: string[], currentRotation: number): Promise<{ pair: PairResult; remaining: string[] }> => {
       const members: string[] = [];
       let currentRemaining = remaining;
       
-      // グループサイズ分だけつまみ出す
       const actualSize = Math.min(groupSize, currentRemaining.length);
       
       for (let i = 0; i < actualSize; i++) {
-        const result = await grabOnePerson(currentRemaining, members);
+        const result = await grabOnePerson(currentRemaining, currentRotation);
         members.push(result.name);
         currentRemaining = result.remaining;
         setGrabbedMembers((prev) => [...prev, result.name]);
         setCurrentPair((prev) => [...prev, result.name]);
+        setRemainingParticipants(currentRemaining);
         
-        // 少し待つ
         if (i < actualSize - 1) {
-          await new Promise((r) => setTimeout(r, 800));
+          await new Promise((r) => setTimeout(r, 1000));
         }
       }
       
@@ -504,7 +581,7 @@ export default function ChristmasRoulette() {
     [groupSize, grabOnePerson]
   );
 
-  // ルーレット開始（自動で全ペア決定）
+  // ルーレット開始
   const startRoulette = async () => {
     if (participants.length < groupSize) {
       alert(`${groupSize}人以上の参加者が必要です！`);
@@ -521,28 +598,25 @@ export default function ChristmasRoulette() {
 
     let remaining = shuffled;
     const allResults: PairResult[] = [];
-
-    // ルーレット回転開始
-    setIsSpinning(true);
     let currentRotation = rotation;
+
+    // ルーレット回転
+    const spinDuration = 2000;
     const spinInterval = setInterval(() => {
-      currentRotation += 15;
+      currentRotation += 8;
       setRotation(currentRotation);
       playTick();
     }, 50);
 
+    await new Promise((r) => setTimeout(r, spinDuration));
+    clearInterval(spinInterval);
+
     // 全ペアを順番に決める
     while (remaining.length >= 2) {
-      // 回転を遅くする
-      await new Promise((r) => setTimeout(r, 1000));
-      clearInterval(spinInterval);
-      setIsSpinning(false);
-      
-      // ペアを決める
       setCurrentPair([]);
-      const result = await decideOnePair(remaining);
+      
+      const result = await decideOnePair(remaining, currentRotation);
       remaining = result.remaining;
-      setRemainingParticipants(remaining);
       allResults.push(result.pair);
       setResults([...allResults]);
       
@@ -550,49 +624,31 @@ export default function ChristmasRoulette() {
       setModalPair(result.pair);
       setShowModal(true);
       
-      // モーダルが閉じるまで待つ
-      await new Promise<void>((resolve) => {
-        const checkModal = setInterval(() => {
-          // showModalがfalseになるまで待つ（onCloseで変わる）
-        }, 100);
-        
-        const waitForClose = () => {
-          setTimeout(() => {
-            if (remaining.length >= 2) {
-              // 次のペアへ
-              setShowModal(false);
-              clearInterval(checkModal);
-              setTimeout(resolve, 500);
-            } else {
-              // 最後のペア
-              clearInterval(checkModal);
-              resolve();
-            }
-          }, 2000);
-        };
-        waitForClose();
-      });
+      // モーダル表示時間
+      await new Promise((r) => setTimeout(r, 2500));
+      setShowModal(false);
       
-      // 残りがあれば再度回転
+      // 次のペアへ（残りがあれば再度回転）
       if (remaining.length >= 2) {
-        setIsSpinning(true);
-        const newSpinInterval = setInterval(() => {
-          currentRotation += 15;
+        await new Promise((r) => setTimeout(r, 500));
+        
+        const nextSpinInterval = setInterval(() => {
+          currentRotation += 8;
           setRotation(currentRotation);
           playTick();
         }, 50);
         
         await new Promise((r) => setTimeout(r, 1500));
-        clearInterval(newSpinInterval);
-        setIsSpinning(false);
+        clearInterval(nextSpinInterval);
       }
     }
 
-    // 1人余った場合は最後のグループに追加
+    // 1人余った場合
     if (remaining.length === 1 && allResults.length > 0) {
       allResults[allResults.length - 1].members.push(remaining[0]);
       setGrabbedMembers((prev) => [...prev, remaining[0]]);
       setResults([...allResults]);
+      setRemainingParticipants([]);
     }
 
     // 完了
@@ -611,10 +667,9 @@ export default function ChristmasRoulette() {
     setModalPair(null);
     setShowConfetti(false);
     setIsRunning(false);
-    setIsSpinning(false);
+    setHandPosition(null);
+    setTargetName(null);
     setIsGrabbing(false);
-    setIsFeinting(false);
-    setGrabbingIndex(-1);
   };
 
   // Enter キー
@@ -630,7 +685,7 @@ export default function ChristmasRoulette() {
   };
 
   const displayNames = remainingParticipants.length > 0 ? remainingParticipants : participants;
-  const isAllDone = results.length > 0 && remainingParticipants.length < 2;
+  const isAllDone = results.length > 0 && remainingParticipants.length < 2 && !isRunning;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-8 px-4 relative overflow-hidden">
@@ -741,22 +796,21 @@ export default function ChristmasRoulette() {
           <div className="flex flex-col items-center">
             <RouletteWheel
               names={displayNames}
-              isSpinning={isSpinning}
               rotation={rotation}
-              targetIndex={targetIndex}
-              grabbingIndex={grabbingIndex}
-              isGrabbing={isGrabbing}
-              isFeinting={isFeinting}
+              handPosition={handPosition}
+              handEmoji={handEmoji}
+              targetName={targetName}
               grabbedMembers={grabbedMembers}
+              isGrabbing={isGrabbing}
             />
 
             {/* 現在つまみ出し中の表示 */}
             {currentPair.length > 0 && isRunning && (
               <div className="mt-4 p-3 bg-yellow-100 rounded-xl">
                 <p className="text-sm text-gray-600 text-center">決定中のペア:</p>
-                <div className="flex gap-2 justify-center mt-1">
+                <div className="flex gap-2 justify-center mt-1 flex-wrap">
                   {currentPair.map((name, i) => (
-                    <span key={i} className="font-bold text-lg text-red-600">{name}</span>
+                    <span key={i} className="font-bold text-lg text-red-600 animate-pulse">{name}</span>
                   ))}
                 </div>
               </div>
@@ -865,22 +919,6 @@ export default function ChristmasRoulette() {
         }
         .animate-memberReveal {
           animation: memberReveal 0.5s ease-out forwards;
-        }
-        @keyframes grabbed {
-          0% { transform: translateX(-50%) scale(1); }
-          30% { transform: translateX(-50%) scale(1.3) translateY(-10px); }
-          100% { transform: translateX(-50%) scale(1.2) translateY(-20px); }
-        }
-        .animate-grabbed {
-          animation: grabbed 0.6s ease-out forwards;
-        }
-        @keyframes feint {
-          0% { transform: translateX(-50%) scale(1); }
-          30% { transform: translateX(-50%) scale(1.15) translateY(-5px); }
-          100% { transform: translateX(-50%) scale(1); }
-        }
-        .animate-feint {
-          animation: feint 0.4s ease-out;
         }
       `}</style>
     </div>
