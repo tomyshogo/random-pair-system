@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+:root {
+  --christmas-red: #c41e3a;
+  --christmas-green: #228b22;
+  --christmas-gold: #ffd700;
+  --snow-white: #fffafa;
+}
+
+body {
+  background: linear-gradient(135deg, #1a472a 0%, #2d5a3f 50%, #1a472a 100%);
+  min-height: 100vh;
+}
+
+/* Snowfall animation */
+@keyframes snowfall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0.3;
+  }
+}
+
+.snowflake {
+  position: fixed;
+  top: -10vh;
+  color: white;
+  font-size: 1rem;
+  animation: snowfall linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Roulette spin animation */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.roulette-spinning {
+  animation: spin 0.1s linear infinite;
+}
+
+/* Glow effect */
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700, 0 0 60px #ffd700;
+  }
+  50% {
+    box-shadow: 0 0 30px #ff6b6b, 0 0 50px #ff6b6b, 0 0 70px #ff6b6b;
+  }
+}
+
+.christmas-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Result reveal animation */
+@keyframes reveal {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.result-reveal {
+  animation: reveal 0.5s ease-out forwards;
+}
+
+/* Confetti animation */
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100%) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.confetti {
+  position: fixed;
+  top: -20px;
+  animation: confetti-fall 3s ease-in-out forwards;
+  pointer-events: none;
+  z-index: 100;
+}
