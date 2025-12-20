@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 // Types
-interface Pair {
-  person1: string;
-  person2: string;
+interface Group {
+  members: string[];
 }
 
 // Snowflake component
@@ -84,6 +83,89 @@ function Confetti({ show }: { show: boolean }) {
   );
 }
 
+// BGM Player component
+function BGMPlayer() {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(0.3);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // クリスマスBGM URLs (著作権フリー)
+  const bgmTracks = [
+    {
+      name: "Jingle Bells",
+      url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    },
+  ];
+
+  useEffect(() => {
+    // Create audio element
+    audioRef.current = new Audio();
+    audioRef.current.loop = true;
+    audioRef.current.volume = volume;
+    
+    // Use a royalty-free Christmas-style music
+    audioRef.current.src = "https://cdn.pixabay.com/download/audio/2022/10/25/audio_946b0939c8.mp3?filename=christmas-eve-116763.mp3";
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
+  const togglePlay = async () => {
+    if (!audioRef.current) return;
+
+    try {
+      if (isPlaying) {
+        audioRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        await audioRef.current.play();
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      console.log("Audio playback failed:", error);
+    }
+  };
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50">
+      <div className="bg-white/95 backdrop-blur rounded-2xl shadow-xl p-4 flex items-center gap-3">
+        <button
+          onClick={togglePlay}
+          className={`w-12 h-12 rounded-full flex items-center justify-center text-2xl transition-all shadow-lg ${
+            isPlaying
+              ? "bg-gradient-to-r from-red-500 to-red-600 text-white"
+              : "bg-gradient-to-r from-green-500 to-green-600 text-white"
+          }`}
+        >
+          {isPlaying ? "🔊" : "🔇"}
+        </button>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-gray-600 font-medium">🎵 BGM</span>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.1"
+            value={volume}
+            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            className="w-20 h-2 accent-red-500"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Roulette wheel component
 function RouletteWheel({
   names,
@@ -130,11 +212,12 @@ export default function ChristmasPairRoulette() {
   const [inputName, setInputName] = useState("");
   const [isSpinning, setIsSpinning] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [pairs, setPairs] = useState<Pair[]>([]);
+  const [groups, setGroups] = useState<Group[]>([]);
   const [showResult, setShowResult] = useState(false);
-  const [currentPairIndex, setCurrentPairIndex] = useState(0);
+  const [currentGroupIndex, setCurrentGroupIndex] = useState(0);
   const [remainingNames, setRemainingNames] = useState<string[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [groupSize, setGroupSize] = useState(2); // 1グループの人数
 
   // Add participant
   const addParticipant = () => {
@@ -160,47 +243,61 @@ export default function ChristmasPairRoulette() {
     return shuffled;
   };
 
-  // Generate pairs from participants
-  const generatePairs = useCallback(() => {
+  // Generate groups from participants
+  const generateGroups = useCallback(() => {
     const shuffled = shuffleArray(participants);
-    const newPairs: Pair[] = [];
+    const newGroups: Group[] = [];
+    
+    for (let i = 0; i < shuffled.length; i += groupSize) {
+      const members = shuffled.slice(i, Math.min(i + groupSize, shuffled.length));
+      newGroups.push({ members });
+    }
 
-    for (let i = 0; i < shuffled.length; i += 2) {
-      if (i + 1 < shuffled.length) {
-        newPairs.push({ person1: shuffled[i], person2: shuffled[i + 1] });
-      } else {
-        // Odd number - last person pairs with first pair
-        if (newPairs.length > 0) {
-          newPairs.push({ person1: shuffled[i], person2: "（3人グループ）" });
-        }
+    // 最後のグループが小さすぎる場合、前のグループと合併
+    if (newGroups.length > 1) {
+      const lastGroup = newGroups[newGroups.length - 1];
+      if (lastGroup.members.length < Math.ceil(groupSize / 2)) {
+        const prevGroup = newGroups[newGroups.length - 2];
+        prevGroup.members.push(...lastGroup.members);
+        newGroups.pop();
       }
     }
 
-    return newPairs;
-  }, [participants]);
+    return newGroups;
+  }, [participants, groupSize]);
+
+  // Calculate group info
+  const getGroupInfo = () => {
+    if (participants.length < groupSize) {
+      return { groupCount: 0, remainder: participants.length };
+    }
+    const groupCount = Math.floor(participants.length / groupSize);
+    const remainder = participants.length % groupSize;
+    return { groupCount, remainder };
+  };
 
   // Start roulette
   const startRoulette = () => {
-    if (participants.length < 2) {
-      alert("2人以上の参加者が必要です！");
+    if (participants.length < groupSize) {
+      alert(`${groupSize}人以上の参加者が必要です！`);
       return;
     }
 
-    const newPairs = generatePairs();
-    setPairs(newPairs);
-    setCurrentPairIndex(0);
+    const newGroups = generateGroups();
+    setGroups(newGroups);
+    setCurrentGroupIndex(0);
     setShowResult(false);
     setRemainingNames([...participants]);
-    spinForNextPair([...participants], newPairs, 0);
+    spinForNextGroup([...participants], newGroups, 0);
   };
 
-  // Spin for next pair
-  const spinForNextPair = (
+  // Spin for next group
+  const spinForNextGroup = (
     remaining: string[],
-    allPairs: Pair[],
-    pairIdx: number
+    allGroups: Group[],
+    groupIdx: number
   ) => {
-    if (pairIdx >= allPairs.length) {
+    if (groupIdx >= allGroups.length) {
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 5000);
       return;
@@ -220,30 +317,30 @@ export default function ChristmasPairRoulette() {
         clearInterval(spinInterval);
         setIsSpinning(false);
         setShowResult(true);
-        setCurrentPairIndex(pairIdx);
+        setCurrentGroupIndex(groupIdx);
 
-        // Remove paired names from remaining
-        const pair = allPairs[pairIdx];
+        // Remove grouped names from remaining
+        const group = allGroups[groupIdx];
         const newRemaining = remaining.filter(
-          (n) => n !== pair.person1 && n !== pair.person2
+          (n) => !group.members.includes(n)
         );
         setRemainingNames(newRemaining);
       }
     }, 50 + spinCount * 2);
   };
 
-  // Continue to next pair
-  const continueToNextPair = () => {
-    if (currentPairIndex + 1 < pairs.length) {
-      spinForNextPair(remainingNames, pairs, currentPairIndex + 1);
+  // Continue to next group
+  const continueToNextGroup = () => {
+    if (currentGroupIndex + 1 < groups.length) {
+      spinForNextGroup(remainingNames, groups, currentGroupIndex + 1);
     }
   };
 
   // Reset all
   const resetAll = () => {
-    setPairs([]);
+    setGroups([]);
     setShowResult(false);
-    setCurrentPairIndex(0);
+    setCurrentGroupIndex(0);
     setRemainingNames([]);
     setShowConfetti(false);
   };
@@ -255,10 +352,13 @@ export default function ChristmasPairRoulette() {
     }
   };
 
+  const { groupCount, remainder } = getGroupInfo();
+
   return (
     <div className="min-h-screen py-8 px-4 relative overflow-hidden">
       <Snowflakes />
       <Confetti show={showConfetti} />
+      <BGMPlayer />
 
       <div className="max-w-2xl mx-auto relative z-10">
         {/* Header */}
@@ -267,11 +367,55 @@ export default function ChristmasPairRoulette() {
             🎄 クリスマス 🎄
           </h1>
           <h2 className="text-2xl md:text-3xl font-bold text-yellow-300 drop-shadow-lg">
-            ペア決めルーレット
+            グループ決めルーレット
           </h2>
           <p className="text-white/80 mt-2">
             参加者を追加してルーレットを回そう！
           </p>
+        </div>
+
+        {/* Group Size Settings */}
+        <div className="bg-white/95 backdrop-blur rounded-2xl shadow-xl p-6 mb-6">
+          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span>⚙️</span> グループ設定
+          </h3>
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="text-gray-700 font-medium">1グループの人数:</span>
+            <div className="flex gap-2">
+              {[2, 3, 4, 5, 6].map((size) => (
+                <button
+                  key={size}
+                  onClick={() => setGroupSize(size)}
+                  className={`w-12 h-12 rounded-xl font-bold text-lg transition-all shadow-md ${
+                    groupSize === size
+                      ? "bg-gradient-to-r from-red-500 to-red-600 text-white scale-110"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  {size}人
+                </button>
+              ))}
+            </div>
+          </div>
+          {participants.length > 0 && (
+            <div className="mt-4 p-3 bg-gradient-to-r from-red-50 to-green-50 rounded-lg">
+              <p className="text-sm text-gray-600">
+                📊 {participants.length}人 → 
+                {groupCount > 0 ? (
+                  <>
+                    <span className="font-bold text-green-600"> {groupCount}グループ</span>
+                    {remainder > 0 && (
+                      <span className="text-orange-500">
+                        （1グループは{groupSize + remainder}人になります）
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-red-500"> 人数が足りません</span>
+                )}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Input Section */}
@@ -317,11 +461,6 @@ export default function ChristmasPairRoulette() {
           {participants.length > 0 && (
             <p className="text-sm text-gray-500 mt-2">
               参加者数: {participants.length}人
-              {participants.length % 2 !== 0 && (
-                <span className="text-orange-500 ml-2">
-                  ※奇数のため1組は3人グループになります
-                </span>
-              )}
             </p>
           )}
         </div>
@@ -335,23 +474,23 @@ export default function ChristmasPairRoulette() {
               currentIndex={currentIndex}
             />
 
-            <div className="mt-6 flex gap-4">
-              {pairs.length === 0 ? (
+            <div className="mt-6 flex gap-4 flex-wrap justify-center">
+              {groups.length === 0 ? (
                 <button
                   onClick={startRoulette}
-                  disabled={participants.length < 2 || isSpinning}
+                  disabled={participants.length < groupSize || isSpinning}
                   className="px-8 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-xl hover:from-red-600 hover:to-red-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-lg"
                 >
                   🎰 ルーレットスタート！
                 </button>
               ) : (
                 <>
-                  {showResult && currentPairIndex + 1 < pairs.length && (
+                  {showResult && currentGroupIndex + 1 < groups.length && (
                     <button
-                      onClick={continueToNextPair}
+                      onClick={continueToNextGroup}
                       className="px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white font-bold rounded-xl hover:from-green-600 hover:to-green-700 transition-all shadow-lg text-lg"
                     >
-                      次のペア 🎄
+                      次のグループ 🎄
                     </button>
                   )}
                   <button
@@ -367,40 +506,66 @@ export default function ChristmasPairRoulette() {
         </div>
 
         {/* Results Section */}
-        {pairs.length > 0 && (
+        {groups.length > 0 && (
           <div className="bg-white/95 backdrop-blur rounded-2xl shadow-xl p-6">
             <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <span>🎁</span> ペア結果
+              <span>🎁</span> グループ結果
             </h3>
             <div className="space-y-3">
-              {pairs.map((pair, index) => (
+              {groups.map((group, index) => (
                 <div
                   key={index}
-                  className={`flex items-center justify-center gap-4 p-4 rounded-xl transition-all
+                  className={`p-4 rounded-xl transition-all
                     ${
-                      index <= currentPairIndex && showResult
+                      index <= currentGroupIndex && showResult
                         ? "bg-gradient-to-r from-red-100 via-white to-green-100 result-reveal"
                         : "bg-gray-100 opacity-50"
                     }`}
                 >
-                  <span className="text-xl font-bold text-red-600">
-                    {index <= currentPairIndex && showResult ? pair.person1 : "?"}
-                  </span>
-                  <span className="text-2xl">💝</span>
-                  <span className="text-xl font-bold text-green-600">
-                    {index <= currentPairIndex && showResult ? pair.person2 : "?"}
-                  </span>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg font-bold text-gray-700">
+                      グループ {index + 1}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      ({group.members.length}人)
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {index <= currentGroupIndex && showResult ? (
+                      group.members.map((member, mIdx) => (
+                        <span
+                          key={mIdx}
+                          className={`px-4 py-2 rounded-full font-bold text-lg ${
+                            mIdx % 2 === 0
+                              ? "bg-red-500 text-white"
+                              : "bg-green-500 text-white"
+                          }`}
+                        >
+                          {member}
+                        </span>
+                      ))
+                    ) : (
+                      Array.from({ length: group.members.length }).map((_, mIdx) => (
+                        <span
+                          key={mIdx}
+                          className="px-4 py-2 rounded-full font-bold text-lg bg-gray-300 text-gray-500"
+                        >
+                          ?
+                        </span>
+                      ))
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
 
-            {showResult && currentPairIndex + 1 >= pairs.length && (
+            {showResult && currentGroupIndex + 1 >= groups.length && (
               <div className="mt-6 text-center">
                 <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-yellow-500 to-green-500">
-                  🎉 全てのペアが決定しました！ 🎉
+                  🎉 全てのグループが決定しました！ 🎉
                 </p>
                 <p className="text-gray-600 mt-2">
-                  メリークリスマス！素敵なペアで楽しんでね 🎄
+                  メリークリスマス！素敵なグループで楽しんでね 🎄
                 </p>
               </div>
             )}
