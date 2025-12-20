@@ -7,113 +7,90 @@ type PairResult = {
   members: string[];
 };
 
-// ================== 効果音フック ==================
-function useSoundEffects() {
-  const audioCtxRef = useRef<AudioContext | null>(null);
+// ================== 音源URL（フリー素材） ==================
+const SOUNDS = {
+  // BGM - クリスマスソング
+  bgm: "https://cdn.pixabay.com/audio/2024/11/04/audio_a7c8f67c5c.mp3",
+  // ルーレット回転 - ベル音
+  tick: "https://cdn.pixabay.com/audio/2022/10/30/audio_617a84d5c8.mp3",
+  // フェイント - あれ？
+  feint: "https://cdn.pixabay.com/audio/2022/03/15/audio_8cb749bf83.mp3",
+  // つまむ時 - キラーン
+  grab: "https://cdn.pixabay.com/audio/2022/03/24/audio_4984a5a7d2.mp3",
+  // 決定時 - ファンファーレ
+  fanfare: "https://cdn.pixabay.com/audio/2021/08/04/audio_0625c1539c.mp3",
+  // 全完了 - 拍手歓声
+  applause: "https://cdn.pixabay.com/audio/2024/02/28/audio_8e4fd87748.mp3",
+  // ジングルベル
+  jingle: "https://cdn.pixabay.com/audio/2022/10/30/audio_617a84d5c8.mp3",
+};
 
-  const getCtx = useCallback(() => {
-    if (!audioCtxRef.current) {
-      audioCtxRef.current = new AudioContext();
-    }
-    return audioCtxRef.current;
+// ================== 音声管理フック ==================
+function useAudioManager() {
+  const bgmRef = useRef<HTMLAudioElement | null>(null);
+  const soundsRef = useRef<Map<string, HTMLAudioElement>>(new Map());
+  const [isBgmPlaying, setIsBgmPlaying] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // 音声をプリロード
+  useEffect(() => {
+    const loadSounds = async () => {
+      // BGM
+      const bgm = new Audio(SOUNDS.bgm);
+      bgm.loop = true;
+      bgm.volume = 0.3;
+      bgmRef.current = bgm;
+
+      // 効果音をプリロード
+      const soundKeys = Object.keys(SOUNDS).filter(k => k !== 'bgm') as (keyof typeof SOUNDS)[];
+      for (const key of soundKeys) {
+        const audio = new Audio(SOUNDS[key]);
+        audio.volume = key === 'applause' ? 0.5 : 0.6;
+        soundsRef.current.set(key, audio);
+      }
+      
+      setIsLoaded(true);
+    };
+
+    loadSounds();
+
+    return () => {
+      bgmRef.current?.pause();
+      soundsRef.current.forEach(audio => audio.pause());
+    };
   }, []);
 
-  const playTick = useCallback(() => {
-    try {
-      const ctx = getCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.value = 600 + Math.random() * 400;
-      osc.type = "sine";
-      gain.gain.setValueAtTime(0.06, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.05);
-    } catch (e) {
-      console.log(e);
+  // BGMトグル
+  const toggleBgm = useCallback(() => {
+    if (!bgmRef.current) return;
+    
+    if (isBgmPlaying) {
+      bgmRef.current.pause();
+    } else {
+      bgmRef.current.play().catch(console.error);
     }
-  }, [getCtx]);
+    setIsBgmPlaying(!isBgmPlaying);
+  }, [isBgmPlaying]);
 
-  const playHover = useCallback(() => {
-    try {
-      const ctx = getCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.value = 400;
-      osc.type = "sine";
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.1);
-    } catch (e) {
-      console.log(e);
+  // 効果音再生
+  const playSound = useCallback((key: keyof typeof SOUNDS) => {
+    const audio = soundsRef.current.get(key);
+    if (audio) {
+      audio.currentTime = 0;
+      audio.play().catch(console.error);
     }
-  }, [getCtx]);
+  }, []);
 
-  const playFeint = useCallback(() => {
-    try {
-      const ctx = getCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.frequency.setValueAtTime(600, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(300, ctx.currentTime + 0.2);
-      osc.type = "sine";
-      gain.gain.setValueAtTime(0.1, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.2);
-    } catch (e) {
-      console.log(e);
+  // 効果音停止
+  const stopSound = useCallback((key: keyof typeof SOUNDS) => {
+    const audio = soundsRef.current.get(key);
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
     }
-  }, [getCtx]);
+  }, []);
 
-  const playGrab = useCallback(() => {
-    try {
-      const ctx = getCtx();
-      [800, 1000, 1200].forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.value = freq;
-        osc.type = "sine";
-        gain.gain.setValueAtTime(0.12, ctx.currentTime + i * 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 0.15);
-        osc.start(ctx.currentTime + i * 0.08);
-        osc.stop(ctx.currentTime + i * 0.08 + 0.15);
-      });
-    } catch (e) {
-      console.log(e);
-    }
-  }, [getCtx]);
-
-  const playWin = useCallback(() => {
-    try {
-      const ctx = getCtx();
-      [523, 659, 784, 1047].forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.value = freq;
-        osc.type = "sine";
-        gain.gain.setValueAtTime(0.12, ctx.currentTime + i * 0.12);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.12 + 0.3);
-        osc.start(ctx.currentTime + i * 0.12);
-        osc.stop(ctx.currentTime + i * 0.12 + 0.3);
-      });
-    } catch (e) {
-      console.log(e);
-    }
-  }, [getCtx]);
-
-  return { playTick, playHover, playFeint, playGrab, playWin };
+  return { toggleBgm, isBgmPlaying, playSound, stopSound, isLoaded };
 }
 
 // ================== 雪アニメーション ==================
@@ -184,6 +161,22 @@ function Confetti({ show }: { show: boolean }) {
         </div>
       ))}
     </>
+  );
+}
+
+// ================== BGMボタン ==================
+function BgmButton({ isPlaying, onToggle }: { isPlaying: boolean; onToggle: () => void }) {
+  return (
+    <button
+      onClick={onToggle}
+      className={`fixed top-4 right-4 z-40 w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg transition-all
+        ${isPlaying 
+          ? "bg-gradient-to-r from-red-500 to-green-500 animate-pulse" 
+          : "bg-white/90 hover:bg-white"}`}
+      title={isPlaying ? "BGMを停止" : "BGMを再生 🎵"}
+    >
+      {isPlaying ? "🎵" : "🔇"}
+    </button>
   );
 }
 
@@ -288,7 +281,7 @@ function RouletteWheel({
         className="w-72 h-72 rounded-full relative overflow-hidden shadow-xl transition-transform duration-100"
         style={{ transform: `rotate(${rotation}deg)` }}
       >
-        {/* セグメント背景 - 動的に生成 */}
+        {/* セグメント背景 - SVGで正確に描画 */}
         <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
           {names.map((_, i) => {
             const startAngle = (segmentAngle * i - 90) * (Math.PI / 180);
@@ -333,9 +326,8 @@ function RouletteWheel({
           const isGrabbed = grabbedMembers.includes(name);
           const isTarget = targetName === name;
           
-          // 名前の位置を計算（中心から外側へ）
           const radians = (angle - 90) * (Math.PI / 180);
-          const radius = 38; // 中心からの距離（%）
+          const radius = 38;
           const x = 50 + radius * Math.cos(radians);
           const y = 50 + radius * Math.sin(radians);
           
@@ -413,7 +405,7 @@ export default function ChristmasRoulette() {
   const [modalPair, setModalPair] = useState<PairResult | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   
-  const { playTick, playHover, playFeint, playGrab, playWin } = useSoundEffects();
+  const { toggleBgm, isBgmPlaying, playSound, stopSound, isLoaded } = useAudioManager();
 
   // 参加者追加
   const addParticipant = () => {
@@ -447,7 +439,7 @@ export default function ChristmasRoulette() {
     const segmentAngle = 360 / names.length;
     const angle = segmentAngle * index + segmentAngle / 2 + currentRotation;
     const radians = (angle - 90) * (Math.PI / 180);
-    const radius = 35; // パーセント
+    const radius = 35;
     
     return {
       x: 50 + radius * Math.cos(radians),
@@ -464,7 +456,6 @@ export default function ChristmasRoulette() {
   // 手を名前の位置に移動
   const moveHandToName = useCallback((name: string, names: string[], currentRotation: number) => {
     const pos = getNamePosition(name, names, currentRotation);
-    // 少し上に調整
     setHandPosition({ x: pos.x, y: pos.y - 15 });
   }, [getNamePosition]);
 
@@ -472,16 +463,13 @@ export default function ChristmasRoulette() {
   const grabOnePerson = useCallback(
     async (remaining: string[], currentRotation: number): Promise<{ name: string; remaining: string[] }> => {
       return new Promise((resolve) => {
-        // 手を待機位置に
         moveHandToCenter();
         setHandEmoji("🖐️");
         
         setTimeout(() => {
-          // フェイント回数（1-2回）
           const feintCount = 1 + Math.floor(Math.random() * 2);
           const feintTargets: string[] = [];
           
-          // フェイント対象を選ぶ（最終ターゲットとは別）
           const shuffled = shuffle(remaining);
           const finalTarget = shuffled[0];
           for (let i = 1; i < Math.min(feintCount + 1, shuffled.length); i++) {
@@ -494,46 +482,41 @@ export default function ChristmasRoulette() {
             if (feintsDone < feintTargets.length) {
               const feintTarget = feintTargets[feintsDone];
               
-              // 手を対象に移動
-              playHover();
+              playSound("tick");
               setTargetName(feintTarget);
               moveHandToName(feintTarget, remaining, currentRotation);
               
               setTimeout(() => {
-                // つまみそうな動き
                 setHandEmoji("🤏");
                 
                 setTimeout(() => {
-                  // やっぱりやめる
-                  playFeint();
+                  // フェイント！「あれ？」音
+                  playSound("feint");
                   setHandEmoji("🖐️");
                   setTargetName(null);
                   moveHandToCenter();
                   
                   feintsDone++;
-                  setTimeout(doFeint, 600);
-                }, 400);
-              }, 500);
+                  setTimeout(doFeint, 700);
+                }, 500);
+              }, 600);
             } else {
               // 本番のつまみ出し
               setTimeout(() => {
-                playHover();
+                playSound("tick");
                 setTargetName(finalTarget);
                 moveHandToName(finalTarget, remaining, currentRotation);
                 
                 setTimeout(() => {
-                  // つまむ！
                   setHandEmoji("🤏");
                   setIsGrabbing(true);
-                  playGrab();
+                  playSound("grab");
                   
                   setTimeout(() => {
-                    // 持ち上げる
                     setHandPosition({ x: 50, y: -20 });
-                    playWin();
+                    playSound("fanfare");
                     
                     setTimeout(() => {
-                      // 完了
                       setIsGrabbing(false);
                       setTargetName(null);
                       setHandPosition(null);
@@ -541,18 +524,18 @@ export default function ChristmasRoulette() {
                       
                       const newRemaining = remaining.filter((n) => n !== finalTarget);
                       resolve({ name: finalTarget, remaining: newRemaining });
-                    }, 600);
-                  }, 500);
-                }, 400);
-              }, 400);
+                    }, 700);
+                  }, 600);
+                }, 500);
+              }, 500);
             }
           };
           
           doFeint();
-        }, 300);
+        }, 400);
       });
     },
-    [moveHandToCenter, moveHandToName, playHover, playFeint, playGrab, playWin]
+    [moveHandToCenter, moveHandToName, playSound]
   );
 
   // ペアを1組決める
@@ -600,16 +583,21 @@ export default function ChristmasRoulette() {
     const allResults: PairResult[] = [];
     let currentRotation = rotation;
 
-    // ルーレット回転
-    const spinDuration = 2000;
+    // ルーレット回転 + ベル音
+    const spinDuration = 2500;
     const spinInterval = setInterval(() => {
       currentRotation += 8;
       setRotation(currentRotation);
-      playTick();
     }, 50);
+    
+    // ジングル音を繰り返し
+    const jingleInterval = setInterval(() => {
+      playSound("jingle");
+    }, 400);
 
     await new Promise((r) => setTimeout(r, spinDuration));
     clearInterval(spinInterval);
+    clearInterval(jingleInterval);
 
     // 全ペアを順番に決める
     while (remaining.length >= 2) {
@@ -624,22 +612,25 @@ export default function ChristmasRoulette() {
       setModalPair(result.pair);
       setShowModal(true);
       
-      // モーダル表示時間
       await new Promise((r) => setTimeout(r, 2500));
       setShowModal(false);
       
-      // 次のペアへ（残りがあれば再度回転）
+      // 次のペアへ
       if (remaining.length >= 2) {
-        await new Promise((r) => setTimeout(r, 500));
+        await new Promise((r) => setTimeout(r, 600));
         
         const nextSpinInterval = setInterval(() => {
           currentRotation += 8;
           setRotation(currentRotation);
-          playTick();
         }, 50);
         
-        await new Promise((r) => setTimeout(r, 1500));
+        const nextJingleInterval = setInterval(() => {
+          playSound("jingle");
+        }, 400);
+        
+        await new Promise((r) => setTimeout(r, 1800));
         clearInterval(nextSpinInterval);
+        clearInterval(nextJingleInterval);
       }
     }
 
@@ -651,14 +642,16 @@ export default function ChristmasRoulette() {
       setRemainingParticipants([]);
     }
 
-    // 完了
+    // 完了！拍手歓声
+    playSound("applause");
     setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 5000);
+    setTimeout(() => setShowConfetti(false), 6000);
     setIsRunning(false);
   };
 
   // リセット
   const resetAll = () => {
+    stopSound("applause");
     setResults([]);
     setGrabbedMembers([]);
     setCurrentPair([]);
@@ -700,6 +693,9 @@ export default function ChristmasRoulette() {
       />
       <Snow />
       <Confetti show={showConfetti} />
+      
+      {/* BGMボタン */}
+      <BgmButton isPlaying={isBgmPlaying} onToggle={toggleBgm} />
 
       {/* モーダル */}
       <PairModal
@@ -716,6 +712,7 @@ export default function ChristmasRoulette() {
         <div className="text-center mb-6">
           <h1 className="text-4xl font-bold text-white drop-shadow-lg">🎄 クリスマス 🎄</h1>
           <h2 className="text-2xl font-bold text-yellow-300">ペア決めルーレット</h2>
+          {!isLoaded && <p className="text-white/60 text-sm mt-1">🔊 音声読み込み中...</p>}
         </div>
 
         {/* 設定パネル */}
@@ -879,6 +876,7 @@ export default function ChristmasRoulette() {
         {/* フッター */}
         <div className="text-center mt-6 text-white/60 text-sm">
           <p>🎄 Merry Christmas 2024 🎄</p>
+          <p className="text-xs mt-1">🔊 右上のボタンでBGMをON/OFF</p>
         </div>
       </div>
 
