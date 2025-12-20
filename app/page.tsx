@@ -603,38 +603,62 @@ export default function ChristmasRoulette() {
     while (remaining.length >= 2) {
       setCurrentPair([]);
       
-      const result = await decideOnePair(remaining, currentRotation);
-      remaining = result.remaining;
-      allResults.push(result.pair);
-      setResults([...allResults]);
+      // 最後のペア判定（残り人数がグループサイズ以下なら最後）
+      const isLastPair = remaining.length <= groupSize;
       
-      // モーダル表示
-      setModalPair(result.pair);
-      setShowModal(true);
-      
-      await new Promise((r) => setTimeout(r, 2500));
-      setShowModal(false);
-      
-      // 次のペアへ
-      if (remaining.length >= 2) {
-        await new Promise((r) => setTimeout(r, 600));
+      if (isLastPair) {
+        // 最後のペアは演出なしで自動決定
+        const lastPair: PairResult = { members: [...remaining] };
+        setGrabbedMembers((prev) => [...prev, ...remaining]);
+        setCurrentPair(remaining);
+        allResults.push(lastPair);
+        setResults([...allResults]);
+        setRemainingParticipants([]);
         
-        const nextSpinInterval = setInterval(() => {
-          currentRotation += 8;
-          setRotation(currentRotation);
-        }, 50);
+        // モーダル表示（最後のペア）
+        playSound("fanfare");
+        setModalPair(lastPair);
+        setShowModal(true);
         
-        const nextJingleInterval = setInterval(() => {
-          playSound("jingle");
-        }, 400);
+        await new Promise((r) => setTimeout(r, 2500));
+        setShowModal(false);
         
-        await new Promise((r) => setTimeout(r, 1800));
-        clearInterval(nextSpinInterval);
-        clearInterval(nextJingleInterval);
+        remaining = [];
+      } else {
+        // 通常の演出付きペア決定
+        const result = await decideOnePair(remaining, currentRotation);
+        remaining = result.remaining;
+        allResults.push(result.pair);
+        setResults([...allResults]);
+        
+        // モーダル表示
+        setModalPair(result.pair);
+        setShowModal(true);
+        
+        await new Promise((r) => setTimeout(r, 2500));
+        setShowModal(false);
+        
+        // 次のペアへ（最後の1ペアでなければ回転）
+        if (remaining.length > groupSize) {
+          await new Promise((r) => setTimeout(r, 600));
+          
+          const nextSpinInterval = setInterval(() => {
+            currentRotation += 8;
+            setRotation(currentRotation);
+          }, 50);
+          
+          const nextJingleInterval = setInterval(() => {
+            playSound("jingle");
+          }, 400);
+          
+          await new Promise((r) => setTimeout(r, 1800));
+          clearInterval(nextSpinInterval);
+          clearInterval(nextJingleInterval);
+        }
       }
     }
 
-    // 1人余った場合
+    // 1人余った場合（グループサイズで割り切れない場合）
     if (remaining.length === 1 && allResults.length > 0) {
       allResults[allResults.length - 1].members.push(remaining[0]);
       setGrabbedMembers((prev) => [...prev, remaining[0]]);
