@@ -584,16 +584,16 @@ function RouletteWheel({
   return (
     <div className="relative flex items-center justify-center w-[min(500px,85vw)] h-[min(500px,85vw)]">
       {/* 下向きのポインター（1人目決定用） */}
-      <div className="absolute z-50 pointer-events-none top-2 left-1/2 -translate-x-1/2">
+      <div className="absolute z-50 pointer-events-none top-0 sm:top-2 left-1/2 -translate-x-1/2">
         {/* 影＋縁取りの二重三角 */}
-        <div className="relative drop-shadow-[0_6px_10px_rgba(0,0,0,0.55)] animate-pulse">
+        <div className="relative drop-shadow-[0_6px_10px_rgba(0,0,0,0.55)] animate-pulse scale-75 sm:scale-100">
           {/* 外側（ゴールド） */}
           <div className="w-0 h-0 border-l-[18px] border-r-[18px] border-t-[30px] border-l-transparent border-r-transparent border-t-yellow-300" />
           {/* 内側（赤） */}
           <div className="absolute top-[3px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[14px] border-r-[14px] border-t-[24px] border-l-transparent border-r-transparent border-t-red-500" />
         </div>
         {/* 小さな軸（飾り） */}
-        <div className="mx-auto mt-1 w-1.5 h-6 rounded-full bg-yellow-200 shadow-[0_2px_6px_rgba(0,0,0,0.35)]" />
+        <div className="mx-auto mt-0.5 sm:mt-1 w-1 sm:w-1.5 h-4 sm:h-6 rounded-full bg-yellow-200 shadow-[0_2px_6px_rgba(0,0,0,0.35)]" />
       </div>
       
       {/* 外周リース（ルーレット全体をリース風に） */}
@@ -628,8 +628,8 @@ function RouletteWheel({
         <div
           className="absolute rounded-full"
           style={{
-            inset: "64px",
-            boxShadow: "inset 0 0 0 42px rgba(0,0,0,0.22)",
+            inset: "12.8%",
+            boxShadow: "inset 0 0 0 8.4% rgba(0,0,0,0.22)",
             borderRadius: "9999px",
           }}
         />
@@ -662,14 +662,14 @@ function RouletteWheel({
           );
         })}
 
-        {/* 飾り（松ぼっくり/雪結晶/ボール） */}
+        {/* 飾り（松ぼっくり/雪結晶/ボール） - %ベースで配置 */}
         <div
-          className="absolute"
+          className="absolute hidden sm:block"
           style={{
-            left: "58px",
-            top: "130px",
-            width: "28px",
-            height: "38px",
+            left: "11.6%",
+            top: "26%",
+            width: "5.6%",
+            height: "7.6%",
             borderRadius: "55% 55% 60% 60%",
             backgroundImage:
               "radial-gradient(circle at 30% 25%, rgba(255,255,255,0.18), transparent 45%), radial-gradient(circle at 60% 70%, rgba(0,0,0,0.35), transparent 55%), repeating-linear-gradient(135deg, rgba(0,0,0,0.0) 0px, rgba(0,0,0,0.0) 3px, rgba(0,0,0,0.12) 4px, rgba(0,0,0,0.0) 7px)",
@@ -678,12 +678,12 @@ function RouletteWheel({
           }}
         />
         <div
-          className="absolute"
+          className="absolute hidden sm:block"
           style={{
-            right: "64px",
-            top: "142px",
-            width: "26px",
-            height: "36px",
+            right: "12.8%",
+            top: "28.4%",
+            width: "5.2%",
+            height: "7.2%",
             borderRadius: "55% 55% 60% 60%",
             backgroundImage:
               "radial-gradient(circle at 30% 25%, rgba(255,255,255,0.18), transparent 45%), radial-gradient(circle at 60% 70%, rgba(0,0,0,0.35), transparent 55%), repeating-linear-gradient(135deg, rgba(0,0,0,0.0) 0px, rgba(0,0,0,0.0) 3px, rgba(0,0,0,0.12) 4px, rgba(0,0,0,0.0) 7px)",
@@ -691,14 +691,14 @@ function RouletteWheel({
             boxShadow: "0 6px 10px rgba(0,0,0,0.45)",
           }}
         />
-        <div className="absolute bottom-[96px] right-[72px] text-xl drop-shadow-[0_3px_6px_rgba(0,0,0,0.55)]">❄️</div>
-        <div className="absolute bottom-[118px] left-[90px] text-xl drop-shadow-[0_3px_6px_rgba(0,0,0,0.55)]">❄️</div>
-        <div className="absolute top-[210px] left-[128px] w-4 h-4 rounded-full bg-red-500 shadow border border-white/50" />
-        <div className="absolute bottom-[168px] right-[132px] w-4 h-4 rounded-full bg-red-400 shadow border border-white/50" />
+        <div className="absolute hidden sm:block text-base sm:text-xl drop-shadow-[0_3px_6px_rgba(0,0,0,0.55)]" style={{ bottom: "19.2%", right: "14.4%" }}>❄️</div>
+        <div className="absolute hidden sm:block text-base sm:text-xl drop-shadow-[0_3px_6px_rgba(0,0,0,0.55)]" style={{ bottom: "23.6%", left: "18%" }}>❄️</div>
+        <div className="absolute hidden sm:block w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-red-500 shadow border border-white/50" style={{ top: "42%", left: "25.6%" }} />
+        <div className="absolute hidden sm:block w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-red-400 shadow border border-white/50" style={{ bottom: "33.6%", right: "26.4%" }} />
 
         {/* 大きめの赤リボン（SVGで立体感） */}
-        <div className="absolute -top-6 left-1/2 -translate-x-1/2 drop-shadow-[0_10px_14px_rgba(0,0,0,0.45)]">
-          <svg width="170" height="110" viewBox="0 0 170 110" role="img" aria-label="ribbon">
+        <div className="absolute -top-[3%] sm:-top-[5%] left-1/2 -translate-x-1/2 drop-shadow-[0_10px_14px_rgba(0,0,0,0.45)] w-[28%] sm:w-[34%]">
+          <svg width="100%" viewBox="0 0 170 110" role="img" aria-label="ribbon">
             <defs>
               <linearGradient id="rb" x1="0" x2="1">
                 <stop offset="0" stopColor="#ef4444" />
@@ -811,7 +811,7 @@ function RouletteWheel({
                 left: `${x}%`,
                 top: `${y}%`,
                 transform: `translate(-50%, ${isTarget && isGrabbing ? '-70%' : '-50%'}) rotate(${-rotation}deg)${isTarget && isGrabbing ? ' scale(1.3)' : ''}`,
-                maxWidth: "90px",
+                maxWidth: "min(90px, 22vw)",
                 wordBreak: "break-all",
                 transition: "all 0.3s ease-out",
               }}
@@ -819,12 +819,12 @@ function RouletteWheel({
               <div className="inline-block">
                 {/* cap + string */}
                 <div className="relative mx-auto w-fit">
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-2 rounded-sm bg-yellow-300 shadow" />
-                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-px h-3 bg-yellow-100/90" />
+                  <div className="absolute -top-1.5 sm:-top-2 left-1/2 -translate-x-1/2 w-3 sm:w-4 h-1.5 sm:h-2 rounded-sm bg-yellow-300 shadow" />
+                  <div className="absolute -top-0.5 sm:-top-1 left-1/2 -translate-x-1/2 w-px h-2 sm:h-3 bg-yellow-100/90" />
                 </div>
                 {/* ornament ball */}
                 <div
-                  className={`relative mt-1 px-3 py-1.5 rounded-full border shadow-lg backdrop-blur-sm
+                  className={`relative mt-0.5 sm:mt-1 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full border shadow-lg backdrop-blur-sm
                     ${isTarget && isGrabbing
                       ? "bg-yellow-300/95 text-black border-yellow-100 scale-105"
                       : isTarget
@@ -836,8 +836,8 @@ function RouletteWheel({
                   style={{ textShadow: "0 1px 2px rgba(0,0,0,0.55)" }}
                 >
                   {/* highlight */}
-                  <div className="pointer-events-none absolute top-0.5 left-2 w-6 h-3 rounded-full bg-white/20 blur-[0.5px]" />
-                  <span className="relative text-sm leading-none">{name}</span>
+                  <div className="pointer-events-none absolute top-0.5 left-1.5 sm:left-2 w-4 sm:w-6 h-2 sm:h-3 rounded-full bg-white/20 blur-[0.5px]" />
+                  <span className="relative text-xs sm:text-sm leading-none">{name}</span>
                 </div>
               </div>
             </div>
@@ -845,15 +845,15 @@ function RouletteWheel({
         })}
 
         {/* 中央の円 */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg flex items-center justify-center border-4 border-yellow-300">
-          <HollyIcon className="w-12 h-12 drop-shadow" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg flex items-center justify-center border-2 sm:border-4 border-yellow-300">
+          <HollyIcon className="w-8 h-8 sm:w-12 sm:h-12 drop-shadow" />
         </div>
       </div>
 
       {/* 手のアイコン */}
       {handPosition && (
         <div
-          className="absolute z-40 text-5xl transition-all pointer-events-none"
+          className="absolute z-40 text-3xl sm:text-5xl transition-all pointer-events-none"
           style={{
             left: `${handPosition.x}%`,
             top: `${handPosition.y}%`,
