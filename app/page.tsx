@@ -335,11 +335,11 @@ function BgmButton({ isPlaying, onToggle }: { isPlaying: boolean; onToggle: () =
   return (
     <button
       onClick={onToggle}
-      className={`fixed top-4 right-4 z-40 w-14 h-14 rounded-full flex items-center justify-center text-2xl shadow-lg transition-all
-        ${isPlaying 
-          ? "bg-gradient-to-r from-red-500 to-green-500 animate-pulse" 
-          : "bg-white/90 hover:bg-white"}`}
-      title={isPlaying ? "BGMを停止" : "BGMを再生 🎵"}
+      className={`fixed top-4 right-4 z-40 w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-xl sm:text-2xl shadow-lg transition-all duration-300 border-2
+        ${isPlaying
+          ? "bg-gradient-to-br from-red-500 to-green-600 border-yellow-300/60 shadow-[0_0_20px_rgba(255,215,0,0.3)]"
+          : "bg-white/90 hover:bg-white border-white/40 hover:border-yellow-300/60 hover:shadow-[0_0_16px_rgba(255,215,0,0.2)]"}`}
+      title={isPlaying ? "BGMを停止" : "BGMを再生"}
     >
       {isPlaying ? "🎵" : "🔇"}
     </button>
@@ -404,29 +404,29 @@ function PairModal({
   if (!show || !pair) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white rounded-3xl p-8 mx-4 max-w-md w-full shadow-2xl animate-modalPop">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md animate-fadeIn px-4">
+      <div className="bg-gradient-to-b from-white to-green-50/60 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl animate-modalPop border border-white/60">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-bounce">🎄</div>
+          <div className="text-5xl sm:text-6xl mb-3 animate-bounce">🎄</div>
           <div className="flex items-center justify-center gap-3 mb-2">
             <OrnamentNumber number={pairIndex + 1} />
-            <span className="text-gray-400 font-bold">/</span>
+            <span className="text-gray-300 font-bold text-lg">/</span>
             <OrnamentNumber number={totalPairs} size="sm" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">ペア決定！</h2>
-          
-          <div className="my-6 p-6 bg-gradient-to-r from-red-100 via-white to-green-100 rounded-2xl">
-            <div className="flex items-center justify-center gap-4 flex-wrap">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">ペア決定！</h2>
+
+          <div className="my-5 p-5 bg-gradient-to-br from-red-50 via-white to-green-50 rounded-2xl border border-yellow-200/60 shadow-inner">
+            <div className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap">
               {pair.members.map((member, i) => (
-                <div key={i} className="flex items-center gap-3">
-                  <div 
-                    className="text-2xl font-bold text-gray-800 bg-white px-4 py-2 rounded-xl shadow-md animate-memberReveal" 
+                <div key={i} className="flex items-center gap-2 sm:gap-3">
+                  <div
+                    className="text-xl sm:text-2xl font-bold text-gray-800 bg-white px-4 py-2 rounded-xl shadow-md animate-memberReveal border border-gray-100"
                     style={{ animationDelay: `${i * 0.3}s` }}
                   >
                     {member}
                   </div>
                   {i < pair.members.length - 1 && (
-                    <span className="text-3xl">🎁</span>
+                    <span className="text-2xl sm:text-3xl">🎁</span>
                   )}
                 </div>
               ))}
@@ -435,18 +435,18 @@ function PairModal({
 
           {isAllDone ? (
             <div className="mb-4">
-              <p className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-green-500">
+              <p className="text-lg sm:text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-green-500">
                 🎉 全ペア決定！ 🎉
               </p>
-              <p className="text-gray-500 mt-1">メリークリスマス！🎅</p>
+              <p className="text-gray-400 text-sm mt-1">メリークリスマス！🎅</p>
             </div>
           ) : (
-            <p className="text-gray-500 mb-4">次のペアを決めています...</p>
+            <p className="text-gray-400 text-sm mb-4">次のペアを決めています...</p>
           )}
 
           <button
             onClick={onClose}
-            className="px-8 py-3 bg-gradient-to-r from-red-500 to-green-500 text-white font-bold rounded-xl hover:from-red-600 hover:to-green-600 transition-all shadow-lg"
+            className="btn-festive px-8 py-3 bg-gradient-to-r from-red-500 to-green-500 text-white font-bold rounded-xl hover:from-red-600 hover:to-green-600 shadow-lg hover:shadow-xl"
           >
             {isAllDone ? "結果を見る 🎁" : "OK ✨"}
           </button>
@@ -469,30 +469,30 @@ function ResultsModal({
   if (!show || results.length === 0) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeIn">
-      <div className="bg-white rounded-3xl p-8 mx-4 max-w-2xl w-full shadow-2xl animate-modalPop max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md animate-fadeIn px-4">
+      <div className="bg-gradient-to-b from-white to-green-50/60 rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl animate-modalPop max-h-[90vh] overflow-y-auto border border-white/60">
         <div className="text-center">
-          <div className="text-6xl mb-4 animate-bounce">🎊</div>
-          <h2 className="text-3xl font-bold text-gray-800 mb-6">
+          <div className="text-5xl sm:text-6xl mb-3 animate-bounce">🎊</div>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-5">
             全ペア決定！
           </h2>
-          
-          <div className="space-y-4 mb-6">
+
+          <div className="space-y-3 mb-6">
             {results.map((pair, i) => (
               <div
                 key={i}
-                className="p-5 rounded-xl bg-gradient-to-r from-red-50 to-green-50 border-2 border-yellow-400 shadow-md"
+                className="p-4 rounded-2xl bg-gradient-to-br from-red-50/80 via-white to-green-50/80 border border-yellow-300/50 shadow-sm"
               >
-                <div className="mb-3">
+                <div className="mb-2">
                   <OrnamentNumber number={i + 1} label="ペア" size="sm" />
                 </div>
-                <div className="flex flex-wrap items-center justify-center gap-4">
+                <div className="flex flex-wrap items-center justify-center gap-3">
                   {pair.members.map((member, j) => (
                     <div key={j} className="flex items-center gap-2">
-                      <span className="text-xl font-bold text-gray-800 bg-white px-4 py-2 rounded-lg shadow-sm">
+                      <span className="text-lg sm:text-xl font-bold text-gray-800 bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-100">
                         {member}
                       </span>
-                      {j < pair.members.length - 1 && <span className="text-3xl">🎁</span>}
+                      {j < pair.members.length - 1 && <span className="text-2xl sm:text-3xl">🎁</span>}
                     </div>
                   ))}
                 </div>
@@ -500,16 +500,16 @@ function ResultsModal({
             ))}
           </div>
 
-          <div className="mb-6 p-4 bg-yellow-50 rounded-xl">
-            <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-green-500">
+          <div className="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-2xl border border-yellow-200/50">
+            <p className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-green-500">
               🎉 メリークリスマス！ 🎉
             </p>
-            <p className="text-gray-600 mt-2">🎄 素敵なペア決めになりました 🎄</p>
+            <p className="text-gray-500 text-sm mt-2">🎄 素敵なペア決めになりました 🎄</p>
           </div>
 
           <button
             onClick={onClose}
-            className="px-8 py-3 bg-gradient-to-r from-red-500 to-green-500 text-white font-bold rounded-xl hover:from-red-600 hover:to-green-600 transition-all shadow-lg text-lg"
+            className="btn-festive px-8 py-3 bg-gradient-to-r from-red-500 to-green-500 text-white font-bold rounded-xl hover:from-red-600 hover:to-green-600 shadow-lg hover:shadow-xl text-base sm:text-lg"
           >
             閉じる ✨
           </button>
@@ -582,7 +582,7 @@ function RouletteWheel({
   };
 
   return (
-    <div className="relative flex items-center justify-center" style={{ width: 500, height: 500 }}>
+    <div className="relative flex items-center justify-center w-[min(500px,85vw)] h-[min(500px,85vw)]">
       {/* 下向きのポインター（1人目決定用） */}
       <div className="absolute z-50 pointer-events-none top-2 left-1/2 -translate-x-1/2">
         {/* 影＋縁取りの二重三角 */}
@@ -597,7 +597,7 @@ function RouletteWheel({
       </div>
       
       {/* 外周リース（ルーレット全体をリース風に） */}
-      <div className="absolute z-0 pointer-events-none" style={{ width: "500px", height: "500px" }}>
+      <div className="absolute inset-0 z-0 pointer-events-none">
         {/* ベース（針葉テクスチャ：conic + radial を重ねて“写真っぽい葉”へ） */}
         <div
           className="absolute inset-0 rounded-full shadow-2xl"
@@ -746,11 +746,9 @@ function RouletteWheel({
       
       {/* ルーレット本体 */}
       <div
-        className="rounded-full relative overflow-hidden shadow-xl transition-transform duration-100 z-10"
-        style={{ 
-          width: '440px',
-          height: '440px',
-          transform: `rotate(${rotation}deg)` 
+        className="rounded-full relative overflow-hidden shadow-xl transition-transform duration-100 z-10 w-[88%] h-[88%]"
+        style={{
+          transform: `rotate(${rotation}deg)`
         }}
       >
         {/* セグメント背景 - SVGで正確に描画 */}
@@ -1389,19 +1387,19 @@ export default function ChristmasRoulette() {
   const isAllDone = results.length > 0 && remainingParticipants.length < 2 && !isRunning;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-8 px-4 relative overflow-hidden">
-      {/* 背景 */}
+    <div className="min-h-screen bg-gradient-to-br from-green-950 via-green-900 to-emerald-950 py-6 sm:py-8 px-3 sm:px-4 relative overflow-hidden">
+      {/* 背景パターン（外部画像に依存しない） */}
       <div
-        className="fixed inset-0 z-0 opacity-20"
+        className="fixed inset-0 z-0 opacity-[0.07]"
         style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1543589077-47d81606c1bf?w=1920&q=80')`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
+          backgroundImage: `radial-gradient(circle at 20% 50%, rgba(255,255,255,0.15) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255,215,0,0.1) 0%, transparent 40%),
+            radial-gradient(circle at 50% 80%, rgba(220,38,38,0.08) 0%, transparent 45%)`,
         }}
       />
       <Snow />
       <Confetti show={showConfetti} />
-      
+
       {/* BGMボタン */}
       <BgmButton isPlaying={isBgmPlaying} onToggle={toggleBgm} />
 
@@ -1414,7 +1412,7 @@ export default function ChristmasRoulette() {
         onClose={() => setShowModal(false)}
         isAllDone={isAllDone}
       />
-      
+
       {/* 結果表示モーダル */}
       <ResultsModal
         show={showResultsModal}
@@ -1424,28 +1422,38 @@ export default function ChristmasRoulette() {
 
       <div className="max-w-2xl mx-auto relative z-20">
         {/* ヘッダー */}
-        <div className="text-center mb-6">
-          <h1 className="text-4xl font-bold text-white drop-shadow-lg">🎄 12/20 Christmas Party 🎄</h1>
-          <h2 className="text-2xl font-bold text-yellow-300">ペア決めルーレット</h2>
-          {!isLoaded && <p className="text-white/60 text-sm mt-1">🔊 音声読み込み中...</p>}
-        </div>
+        <header className="text-center mb-6 sm:mb-8">
+          <div className="inline-block mb-2">
+            <span className="text-4xl sm:text-5xl">🎄</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold title-shimmer leading-tight">
+            Christmas Party
+          </h1>
+          <p className="text-white/70 text-sm sm:text-base mt-1 font-medium tracking-wide">12/20 ペア決めルーレット</p>
+          {!isLoaded && (
+            <p className="text-white/40 text-xs mt-2 flex items-center justify-center gap-1">
+              <span className="inline-block w-3 h-3 border-2 border-white/40 border-t-white/80 rounded-full animate-spin" />
+              音声読み込み中...
+            </p>
+          )}
+        </header>
 
         {/* 設定パネル */}
-        <div className="bg-white/95 rounded-2xl shadow-xl p-5 mb-5">
-          <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
+        <div className="glass-card rounded-2xl p-4 sm:p-5 mb-4">
+          <div className="section-label mb-3">
             <span>⚙️</span> ペア人数
-          </h3>
+          </div>
           <div className="flex gap-2 flex-wrap">
             {[2, 3, 4, 5, 6].map((n) => (
               <button
                 key={n}
                 onClick={() => !isRunning && setGroupSize(n)}
                 disabled={isRunning}
-                className={`px-4 py-2 rounded-lg font-bold transition-all ${
+                className={`px-4 py-2 rounded-xl font-bold text-sm transition-all duration-200 ${
                   groupSize === n
-                    ? "bg-red-500 text-white shadow-md"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                } ${isRunning ? "opacity-50 cursor-not-allowed" : ""}`}
+                    ? "bg-gradient-to-br from-red-500 to-red-600 text-white shadow-md shadow-red-500/25 scale-105"
+                    : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200 hover:border-gray-300"
+                } ${isRunning ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
               >
                 {n}人
               </button>
@@ -1454,11 +1462,12 @@ export default function ChristmasRoulette() {
         </div>
 
         {/* 参加者入力 */}
-        <div className="bg-white/95 rounded-2xl shadow-xl p-5 mb-5">
-          <h3 className="font-bold text-gray-800 mb-3 flex items-center gap-2">
-            <span>👥</span> 参加者 ({participants.length}人)
-          </h3>
-          
+        <div className="glass-card rounded-2xl p-4 sm:p-5 mb-4">
+          <div className="section-label mb-3">
+            <span>👥</span> 参加者
+            <span className="ml-1 text-xs font-normal text-gray-400">({participants.length}人)</span>
+          </div>
+
           <div className="flex gap-2 mb-3">
             <input
               type="text"
@@ -1467,44 +1476,53 @@ export default function ChristmasRoulette() {
               onKeyPress={handleKeyPress}
               placeholder="名前を入力..."
               disabled={isRunning}
-              className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-green-500 focus:outline-none disabled:opacity-50"
+              className="festive-input flex-1 px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:border-green-500 focus:outline-none disabled:opacity-40 text-sm bg-white"
             />
             <button
               onClick={addParticipant}
               disabled={isRunning}
-              className="px-5 py-2 bg-green-500 text-white font-bold rounded-lg hover:bg-green-600 transition-all disabled:opacity-50"
+              className="btn-festive px-5 py-2.5 bg-gradient-to-br from-green-500 to-emerald-600 text-white font-bold rounded-xl hover:from-green-600 hover:to-emerald-700 shadow-md shadow-green-500/20 disabled:opacity-40 disabled:shadow-none text-sm"
             >
               追加
             </button>
           </div>
 
-          <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+          <div className="flex flex-wrap gap-2 max-h-36 overflow-y-auto py-1">
             {participants.map((name) => (
               <span
                 key={name}
-                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full border transition-all ${
+                className={`participant-tag inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium ${
                   grabbedMembers.includes(name)
-                    ? "bg-gray-200 text-gray-400 line-through"
-                    : "bg-red-50 text-gray-800"
+                    ? "bg-gray-100 text-gray-400 line-through border border-gray-200"
+                    : "bg-gradient-to-r from-red-50 to-rose-50 text-gray-700 border border-red-200/60"
                 }`}
               >
+                {!grabbedMembers.includes(name) && <span className="text-xs opacity-60">🎅</span>}
                 {name}
                 {!isRunning && (
-                  <button onClick={() => removeParticipant(name)} className="text-red-500 font-bold ml-1">
+                  <button
+                    onClick={() => removeParticipant(name)}
+                    className="text-red-400 hover:text-red-600 font-bold ml-0.5 transition-colors w-4 h-4 flex items-center justify-center rounded-full hover:bg-red-100"
+                  >
                     ×
                   </button>
                 )}
               </span>
             ))}
           </div>
-          
+
           {participants.length > 0 && (
-            <p className="text-sm text-gray-500 mt-2">📊 {getGroupInfo()}</p>
+            <div className="mt-3 pt-3 border-t border-gray-100">
+              <p className="text-xs text-gray-400 flex items-center gap-1.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400" />
+                {getGroupInfo()}
+              </p>
+            </div>
           )}
         </div>
 
         {/* ルーレット */}
-        <div className="bg-white/95 rounded-2xl shadow-xl p-6 mb-5">
+        <div className="glass-card rounded-2xl p-4 sm:p-6 mb-4">
           <div className="flex flex-col items-center">
             <RouletteWheel
               names={displayNames}
@@ -1519,31 +1537,31 @@ export default function ChristmasRoulette() {
 
             {/* 現在つまみ出し中の表示 */}
             {currentPair.length > 0 && isRunning && (
-              <div className="mt-4 p-3 bg-yellow-100 rounded-xl">
-                <p className="text-sm text-gray-600 text-center">決定中のペア:</p>
-                <div className="flex gap-2 justify-center mt-1 flex-wrap">
+              <div className="mt-4 p-3 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl border border-yellow-200/60">
+                <p className="text-xs text-gray-500 text-center mb-1 font-medium">決定中のペア</p>
+                <div className="flex gap-2 justify-center flex-wrap">
                   {currentPair.map((name, i) => (
-                    <span key={i} className="font-bold text-lg text-red-600 animate-pulse">{name}</span>
+                    <span key={i} className="font-bold text-base sm:text-lg text-red-600 animate-pulse">{name}</span>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="mt-6 flex gap-4">
+            <div className="mt-5 sm:mt-6 flex gap-3">
               {!isRunning && results.length === 0 && (
                 <button
                   onClick={startRoulette}
                   disabled={participants.length < groupSize}
-                  className="px-8 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-bold rounded-2xl hover:from-red-600 hover:to-red-700 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed text-xl"
+                  className="btn-festive group px-8 sm:px-10 py-3.5 sm:py-4 bg-gradient-to-br from-red-500 via-red-500 to-rose-600 text-white font-extrabold rounded-2xl hover:from-red-600 hover:via-red-600 hover:to-rose-700 shadow-lg shadow-red-500/30 hover:shadow-xl hover:shadow-red-500/40 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none text-lg sm:text-xl tracking-wide"
                 >
-                  🎰 スタート！
+                  <span className="group-hover:scale-110 inline-block transition-transform">🎰</span> スタート！
                 </button>
               )}
-              
+
               {!isRunning && results.length > 0 && (
                 <button
                   onClick={resetAll}
-                  className="px-6 py-3 bg-gray-500 text-white font-bold rounded-xl hover:bg-gray-600 transition-all"
+                  className="btn-festive px-6 py-3 bg-gray-500/90 text-white font-bold rounded-xl hover:bg-gray-600 shadow-md"
                 >
                   🔄 リセット
                 </button>
@@ -1554,16 +1572,16 @@ export default function ChristmasRoulette() {
 
         {/* 結果表示 */}
         {results.length > 0 && (
-          <div className="bg-white/95 rounded-2xl shadow-xl p-5">
-            <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <div className="glass-card rounded-2xl p-4 sm:p-5">
+            <div className="section-label mb-4">
               <span>🎊</span> 結果
-            </h3>
-            
+            </div>
+
             <div className="space-y-3">
               {results.map((pair, i) => (
                 <div
                   key={i}
-                  className="p-4 rounded-xl bg-gradient-to-r from-red-50 to-green-50 border-2 border-yellow-400 shadow-md"
+                  className="p-4 rounded-2xl bg-gradient-to-br from-red-50/80 via-white to-green-50/80 border border-yellow-300/50 shadow-sm"
                 >
                   <div className="mb-2">
                     <OrnamentNumber number={i + 1} label="ペア" size="sm" />
@@ -1571,8 +1589,8 @@ export default function ChristmasRoulette() {
                   <div className="flex flex-wrap items-center justify-center gap-3">
                     {pair.members.map((member, j) => (
                       <div key={j} className="flex items-center gap-2">
-                        <span className="text-lg font-bold text-gray-800">{member}</span>
-                        {j < pair.members.length - 1 && <span className="text-2xl">🎁</span>}
+                        <span className="text-base sm:text-lg font-bold text-gray-800">{member}</span>
+                        {j < pair.members.length - 1 && <span className="text-xl sm:text-2xl">🎁</span>}
                       </div>
                     ))}
                   </div>
@@ -1581,21 +1599,20 @@ export default function ChristmasRoulette() {
             </div>
 
             {isAllDone && (
-              <div className="mt-6 text-center p-4 bg-yellow-50 rounded-xl">
-                <p className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-green-500">
+              <div className="mt-5 text-center p-4 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-2xl border border-yellow-200/50">
+                <p className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-green-500">
                   🎉 全ペア決定！ 🎉
                 </p>
-                <p className="text-gray-600 mt-1">メリークリスマス！🎄</p>
+                <p className="text-gray-500 text-sm mt-1">メリークリスマス！🎄</p>
               </div>
             )}
           </div>
         )}
 
         {/* フッター */}
-        <div className="text-center mt-6 text-white/60 text-sm">
-          <p>🎄 Merry Christmas 2025 🎄</p>
-          <p className="text-xs mt-1">🔊 右上のボタンでBGMをON/OFF</p>
-        </div>
+        <footer className="text-center mt-8 mb-2">
+          <p className="text-white/30 text-xs tracking-widest">🎄 Merry Christmas 2025 🎄</p>
+        </footer>
       </div>
 
       {/* アニメーション用CSS */}
